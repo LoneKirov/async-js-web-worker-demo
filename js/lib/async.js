@@ -1,12 +1,4 @@
-define(function() {
-    //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-    function guidGenerator() {
-        var S4 = function() {
-            return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-        };
-        return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
-    }
-
+define(['undefined-vars', 'guid'], function(undefined_vars, guid) {
     var inFlight = []
 
     var w = new SharedWorker('js/lib/async_worker.js');
@@ -20,10 +12,18 @@ define(function() {
 
     return function(f, e) {
         var r = new Object;
-        r.id = guidGenerator();
+        var fnStr = f.toString();
+        var undef = undefined_vars(fnStr);
+
+        var env = new Object;
+        for (v in undef) {
+            env[v] = JSON.stringify(e(v));
+        }
+
+        r.id = guid();
         r.ready = false;
         inFlight[r.id] = r;
-        w.port.postMessage({'function': f.toString(), 'environment': {'x': JSON.stringify(e('x')) }, 'id': r.id});
+        w.port.postMessage({'function': f.toString(), 'environment': env, 'id': r.id});
         return r;
     }
 });
