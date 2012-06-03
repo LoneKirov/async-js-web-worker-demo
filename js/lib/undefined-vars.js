@@ -35,7 +35,7 @@ define(['uglify-js'], function(uglify) {
                     'null' : true,
                     'this' : true
                 };
-                if (!literals[exp] && w.parent()[0] !== "new" && !scope.has(exp)) {
+                if (!literals[exp] && w.parent()[0] !== "new" && w.parent()[0] !== "call" && !scope.has(exp)) {
                     vars[exp] = true;
                 }
             }
